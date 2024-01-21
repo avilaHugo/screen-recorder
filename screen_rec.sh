@@ -12,9 +12,11 @@ ffmpeg \
     -framerate 30 \
     -f x11grab \
     -i $DISPLAY \
+    -f alsa -i 'default' -ac 1 -ar 48000 \
     -c:v libx264rgb \
     -crf 0 \
     -preset ultrafast \
+    -c:a aac -b:a 192k \
     -color_range 2 \
     "${OUTPUT_NAME}"
 

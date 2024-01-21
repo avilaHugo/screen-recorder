@@ -8,14 +8,8 @@ OUTPUT_NAME="${1?'No output name was passed !'}"
 }
 
 ffmpeg \
-    -f pulse \
-    -ac 1 \
-    -thread_queue_size 512 \
-    -i default \
-    -f v4l2 \
-    -input_format mjpeg \
-    -thread_queue_size 512 \
-    -i /dev/video0 \
+    -y \
+    -f v4l2 -input_format mjpeg -framerate 30 -video_size '640x480' -thread_queue_size 1024 -i /dev/video0 \
     -c:v libx264 \
-    -preset ultrafast \
     "${OUTPUT_NAME}"
+
