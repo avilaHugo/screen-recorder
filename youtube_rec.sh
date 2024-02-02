@@ -1,13 +1,21 @@
 #!/usr/bin/env bash
 
+# This configs work for my setup, check the commands before
+# attempting to use then.
+
 NOW=$( date +"%Y_%m_%d-%H_%M_%S"  )
 OUTPUT_PREFIX="${1?'No OUTPUT_PREFIX was passed !'}-${NOW}"
 DIRNAME=$(dirname ${OUTPUT_PREFIX} )
 STOP_SIGN="$( mktemp -p ${DIRNAME} -t STOP_SIGN.XXXXXX )"
 
 
-# This configs work for my setup, check the commands before
-# attempting to use it.
+######## THREADS
+# Record mic
+< "${STOP_SIGN}" ffmpeg \
+    -f alsa  -ac 1 -ar 48000  -i 'default' \
+    -c:a pcm_s16le \
+    -preset ultrafast  \
+    "${OUTPUT_PREFIX}.mic.wav" &>/dev/null &
 
 # Grab screen (no audio)
 < "${STOP_SIGN}" ffmpeg \
@@ -16,15 +24,13 @@ STOP_SIGN="$( mktemp -p ${DIRNAME} -t STOP_SIGN.XXXXXX )"
     -preset ultrafast \
     "${OUTPUT_PREFIX}.screen.mp4" &>/dev/null &
 
-# Record webcan feed with its audio 
+# Record webcan
 < "${STOP_SIGN}" ffmpeg \
-    -y \
-    -f alsa  -ac 2 -ar 48000  -i 'default' \
     -f v4l2 -input_format mjpeg -framerate 30 -video_size '640x480' -thread_queue_size 1024 -i /dev/video0 \
-    -b:a 256k -c:a pcm_s16le \
     -c:v libx264  \
     -preset ultrafast  \
     "${OUTPUT_PREFIX}.webcan.mp4" &>/dev/null &
+########
 
 while :; do
     # Here we are prompting the user for the stop sign (the letter q).
