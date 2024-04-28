@@ -12,24 +12,24 @@ STOP_SIGN="$( mktemp -p ${DIRNAME} -t STOP_SIGN.XXXXXX )"
 ######## THREADS
 # Record mic
 < "${STOP_SIGN}" ffmpeg \
-    -f alsa  -ac 1 -ar 48000  -i 'default' \
+    -f alsa  -ac 1 -ar 48000  -i 'default' -thread_queue_size 1024 \
     -c:a pcm_s16le \
     -preset ultrafast  \
-    "${OUTPUT_PREFIX}.mic.wav" &>/dev/null &
+    "${OUTPUT_PREFIX}.mic.wav" &>"${OUTPUT_PREFIX}.mic.wav.log" &
 
 # Grab screen (no audio)
 < "${STOP_SIGN}" ffmpeg \
     -f x11grab -video_size '1920x1080' -framerate 30 -thread_queue_size 1024 -i "${DISPLAY}" \
     -c:v libx264rgb -crf 0 -color_range 2 \
     -preset ultrafast \
-    "${OUTPUT_PREFIX}.screen.mp4" &>/dev/null &
+    "${OUTPUT_PREFIX}.screen.mp4" &>"${OUTPUT_PREFIX}.screen.mp4.log" &
 
 # Record webcan
 < "${STOP_SIGN}" ffmpeg \
     -f v4l2 -input_format mjpeg -framerate 30 -video_size '640x480' -thread_queue_size 1024 -i /dev/video0 \
     -c:v libx264  \
     -preset ultrafast  \
-    "${OUTPUT_PREFIX}.webcan.mp4" &>/dev/null &
+    "${OUTPUT_PREFIX}.webcan.mp4" &>"${OUTPUT_PREFIX}.webcan.mp4.log" &
 ########
 
 while :; do
